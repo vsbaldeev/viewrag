@@ -1,21 +1,20 @@
 import pinecone
 from pinecone.core.openapi.db_data.model.search_records_response import SearchRecordsResponse
+import secrets_manager
 
-import os
 
-from dotenv import load_dotenv
-load_dotenv(verbose=True)
+__all__ = ["SearchEngine"]
 
 
 class SearchEngine:
     def __init__(self):
-        pinecone_client = pinecone.Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+        pinecone_client = pinecone.Pinecone(api_key=secrets_manager.get("PINECONE_API_KEY"))
         self.__pinecone_dense_index = pinecone_client.Index(
-            host=os.getenv("PINECONE_DENSE_INDEX_HOST"),
+            host=secrets_manager.get("PINECONE_DENSE_INDEX_HOST"),
             pool_threads=10
         )
         self.__pinecone_sparse_index = pinecone_client.Index(
-            host=os.getenv("PINECONE_SPARSE_INDEX_HOST"),
+            host=secrets_manager.get("PINECONE_SPARSE_INDEX_HOST"),
             pool_threads=10
         )
 

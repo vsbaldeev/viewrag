@@ -1,9 +1,9 @@
 import pandas
 import pinecone
-import os
 import itertools
 import uuid
-import streamlit
+import secrets_manager
+
 
 def load_reviews(item_type: str) -> pandas.DataFrame:
     reviews = pandas.read_csv(f"data/{item_type}s_reviews.csv")
@@ -48,9 +48,15 @@ def main():
     tv_df = load_media_df("tv")
     all_media_df = pandas.concat([movie_df, tv_df])
 
-    pinecone_client = pinecone.Pinecone(api_key=streamlit.secrets.get("PINECONE_API_KEY"))
-    pinecone_dense_index = pinecone_client.Index(host=streamlit.secrets.get("PINECONE_DENSE_INDEX_HOST"), pool_threads=10)
-    pinecone_sparse_index = pinecone_client.Index(host=streamlit.secrets.get("PINECONE_SPARSE_INDEX_HOST"), pool_threads=10)
+    pinecone_client = pinecone.Pinecone(api_key=secrets_manager.get("PINECONE_API_KEY"))
+    pinecone_dense_index = pinecone_client.Index(
+        host=secrets_manager.get("PINECONE_DENSE_INDEX_HOST"),
+        pool_threads=10
+    )
+    pinecone_sparse_index = pinecone_client.Index(
+        host=secrets_manager.get("PINECONE_SPARSE_INDEX_HOST"),
+        pool_threads=10
+    )
     records = create_records_for_pinecone(all_reviews, all_media_df)
     namespace = "__default__"
 
