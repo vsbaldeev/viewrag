@@ -2,7 +2,7 @@ import requests
 import streamlit
 import pandas
 import csv
-
+import secrets_manager
 
 def get_top_movies_json(api_key: str, start_date: str, end_date: str) -> dict:
     url = "https://api.themoviedb.org/3/discover/movie"
@@ -67,7 +67,7 @@ def write_to_csv(json_dict, filename: str) -> None:
 
 
 def main():
-    tmdb_api_key = streamlit.secrets.get("TMDB_API_KEY")
+    tmdb_api_key = secrets_manager.get("TMDB_API_KEY")
     start_date = "2015-12-31"
     end_date = "2025-12-31"
 
@@ -76,6 +76,10 @@ def main():
 
     tv_shows_dict = get_top_tv_shows_json(tmdb_api_key, start_date, end_date)
     write_to_csv(tv_shows_dict, f"../data/tvs.csv")
+    write_to_csv(movies_dict, f"data/movies.csv")
+
+    tv_shows_dict = get_top_tv_shows_json(tmdb_api_key, start_date, end_date)
+    write_to_csv(tv_shows_dict, f"data/tvs.csv")
 
 
 if __name__ == '__main__':
