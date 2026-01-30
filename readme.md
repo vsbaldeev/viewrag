@@ -1,36 +1,27 @@
 # 🎬 ViewRAG: Movie & TV Show Review Analysis System
 
-## 🛠️ Technical Stack
+**AI-powered system that answers questions about media based on real user reviews from TMDB**
 
-- **Data Collection**: TMDb API with Python `requests`
-- **Vector Database**: ChromaDB with persistent storage
-- **Embeddings**: Sentence Transformers (`all-MiniLM-L6-v2`)
-- **LLM Inference**: Ollama with Llama 3.2 3B model
-- **Frontend**: Streamlit
-- **Environment Management**: Python `dotenv`
+## Limitations
+- **Language**: english-only support
+- **No spoiler protection**: users might know some details about a plot
+- **Small database**: review about 40 movies and tv shows
 
-## 🚀 Quick Start
+## 🌟 Key Features
+- **Hybrid search**: Media title extraction via LLM + metadata filtering in Pinecone
+- **Observability**: Call tracing and token tracking via LangSmith
+- **Managed services**: Usage of cloud services instead of local solutions
 
-### Prerequisites
-- Python 3.13
-- Ollama installed and running ([Download Ollama](https://ollama.com/))
-- TMDb API key (register at [themoviedb.org](https://www.themoviedb.org/settings/api))
 
-### Installation
-```bash
-python3.13 -m venv venv
-source venv/bin/activate
+## 🛠️ Technology Stack
+| Component | Technology                                    | Why                                                     |
+|-----------|-----------------------------------------------|---------------------------------------------------------|
+| **LLM** | Groq + Llama 3.1 8B                           | Fast inference, free tier, high limit of tokens per day |
+| **Vector DB** | Pinecone (serverless)                         | Managed, scalable, no ops overhead, integrated llama-text-embed-v2 model         | |
+| **Observability** | LangSmith                                     | End-to-end tracing and debugging                        |
+| **Frontend** | Streamlit                                     | Rapid prototyping and demo                              |
 
-pip install -r requirements.txt
-```
 
-### Running project
+## 🚀 Try It Live
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://viewrag.streamlit.app)
 
-```bash
-touch .env # TMDB_API_KEY=<your token>
-mkdir data
-python3.13 fetch_tv_datasets.py
-python3.13 fetch_reviews.py
-python3.13 create_embeddings.py
-streamlit run app.py
-```

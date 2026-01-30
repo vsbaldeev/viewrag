@@ -1,14 +1,7 @@
 import csv
-import os
-
 import pandas
 import requests
-from dotenv import load_dotenv
-
-
-def get_api_key() -> str:
-    load_dotenv()
-    return os.getenv("TMDB_API_KEY")
+import streamlit
 
 
 def get_item_reviews_dicts(api_key: str, item_type: str, item_id: str) -> list[dict]:
@@ -54,7 +47,7 @@ def get_item_reviews_dicts(api_key: str, item_type: str, item_id: str) -> list[d
 def get_items_reviews(api_key: str, item_type: str, dataset: pandas.DataFrame) -> list[dict]:
     reviews = []
 
-    for item_id in dataset["ids"]:
+    for item_id in dataset["media_id"]:
         reviews += get_item_reviews_dicts(api_key, item_type, item_id)
 
     return reviews
@@ -68,11 +61,11 @@ def write_reviews_to_file(reviews: list[dict], filename: str) -> None:
 def main():
     tmdb_api_key = get_api_key()
 
-    movies_dataset = pandas.read_csv("data/movies_since_2015-12-31.csv")
+    movies_dataset = pandas.read_csv("data/movies.csv")
     movies_reviews = get_items_reviews(tmdb_api_key, "movie", movies_dataset)
     write_reviews_to_file(movies_reviews, f"data/movies_reviews.csv")
 
-    movies_dataset = pandas.read_csv("data/tv_shows_since_2015-12-31.csv")
+    movies_dataset = pandas.read_csv("data/tvs.csv")
     tv_shows_reviews = get_items_reviews(tmdb_api_key, "tv", movies_dataset)
     write_reviews_to_file(tv_shows_reviews, f"data/tvs_reviews.csv")
 
