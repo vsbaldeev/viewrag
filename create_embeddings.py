@@ -1,45 +1,64 @@
 import pandas
-import chromadb
-from chromadb.utils import embedding_functions
-from chromadb.api.models.Collection import Collection
+import pinecone
+import os
+import itertools
+import uuid
 
-def load_reviews(item_type: str):
+from dotenv import load_dotenv
+load_dotenv(verbose=True)
+
+def load_reviews(item_type: str) -> pandas.DataFrame:
     reviews = pandas.read_csv(f"data/{item_type}s_reviews.csv")
     return reviews
 
 
-def index_reviews(reviews: pandas.DataFrame, collection: Collection):
-    ids = [str(i) for i in range(len(reviews))]
+def load_media_df(item_type: str) -> pandas.DataFrame:
+    df = pandas.read_csv(f"data/{item_type}s.csv")
+    return df
 
-    documents = reviews["content"].tolist()
 
-    metadatas = [
+def create_records_for_pinecone(reviews: pandas.DataFrame, media_df: pandas.DataFrame) -> list[dict]:
+    print("Creating records for Pinecone")
+
+    reviews_with_title = reviews.merge(media_df[["media_id", "media_title"]], how="inner", on="media_id")
+
+    return [
         {
-            "review_id": row["review_id"],
-            "created_at": row["created_at"],
+            "_id": str(uuid.uuid4()),
+            "review": row["content"],
+            "media_title": row["media_title"].lower(),
+            "created_at": row["created_at"]
         }
-        for _, row in reviews.iterrows()
+        for _, row in reviews_with_title.iterrows()
     ]
 
-    collection.add(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas
-    )
+
+def chunks(iterable, batch_size):
+    it = iter(iterable)
+    chunk = tuple(itertools.islice(it, batch_size))
+    while chunk:
+        yield chunk
+        chunk = tuple(itertools.islice(it, batch_size))
+
 
 def main():
     movies_reviews = load_reviews("movie")
     tvs_reviews = load_reviews("tv")
     all_reviews = pandas.concat([movies_reviews, tvs_reviews])
 
-    client = chromadb.PersistentClient(path="data/chromadb")
+    movie_df = load_media_df("movie")
+    tv_df = load_media_df("tv")
+    all_media_df = pandas.concat([movie_df, tv_df])
 
-    collection = client.get_or_create_collection(
-        "media_reviews",
-        embedding_function=embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2"),
-    )
+    pinecone_client = pinecone.Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+    pinecone_dense_index = pinecone_client.Index(host=os.getenv("PINECONE_DENSE_INDEX_HOST"), pool_threads=10)
+    pinecone_sparse_index = pinecone_client.Index(host=os.getenv("PINECONE_SPARSE_INDEX_HOST"), pool_threads=10)
+    records = create_records_for_pinecone(all_reviews, all_media_df)
+    namespace = "__default__"
 
-    index_reviews(all_reviews, collection)
+    for chunk in chunks(records, batch_size=96):
+        pinecone_dense_index.upsert_records(namespace=namespace, records=chunk)
+        pinecone_sparse_index.upsert_records(namespace=namespace, records=chunk)
 
 
 if __name__ == '__main__':
