@@ -1,15 +1,7 @@
-import os
-
 import requests
-from dotenv import load_dotenv
 import pandas
 import csv
-
-
-def get_api_key() -> str:
-    load_dotenv()
-    return os.getenv("TMDB_API_KEY")
-
+import secrets_manager
 
 def get_top_movies_json(api_key: str, start_date: str, end_date: str) -> dict:
     url = "https://api.themoviedb.org/3/discover/movie"
@@ -74,7 +66,7 @@ def write_to_csv(json_dict, filename: str) -> None:
 
 
 def main():
-    tmdb_api_key = get_api_key()
+    tmdb_api_key = secrets_manager.get("TMDB_API_KEY")
     start_date = "2015-12-31"
     end_date = "2025-12-31"
 

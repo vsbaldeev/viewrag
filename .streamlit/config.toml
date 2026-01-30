@@ -2,5 +2,12 @@
 headless = true
 port = 8501
 
+[logger]
+level = "info"
+messageFormat = "%(asctime)s %(message)s"
+
+[client]
+showErrorDetails = "full"
+
 [browser]
 gatherUsageStats = false

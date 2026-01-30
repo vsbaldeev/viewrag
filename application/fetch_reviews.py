@@ -1,14 +1,7 @@
 import csv
-import os
-
 import pandas
 import requests
-from dotenv import load_dotenv
-
-
-def get_api_key() -> str:
-    load_dotenv()
-    return os.getenv("TMDB_API_KEY")
+import secrets_manager
 
 
 def get_item_reviews_dicts(api_key: str, item_type: str, item_id: str) -> list[dict]:
@@ -66,15 +59,15 @@ def write_reviews_to_file(reviews: list[dict], filename: str) -> None:
 
 
 def main():
-    tmdb_api_key = get_api_key()
+    tmdb_api_key = secrets_manager.get("TMDB_API_KEY")
 
-    movies_dataset = pandas.read_csv("data/movies.csv")
+    movies_dataset = pandas.read_csv("../data/movies.csv")
     movies_reviews = get_items_reviews(tmdb_api_key, "movie", movies_dataset)
-    write_reviews_to_file(movies_reviews, f"data/movies_reviews.csv")
+    write_reviews_to_file(movies_reviews, f"../data/movies_reviews.csv")
 
-    movies_dataset = pandas.read_csv("data/tvs.csv")
+    movies_dataset = pandas.read_csv("../data/tvs.csv")
     tv_shows_reviews = get_items_reviews(tmdb_api_key, "tv", movies_dataset)
-    write_reviews_to_file(tv_shows_reviews, f"data/tvs_reviews.csv")
+    write_reviews_to_file(tv_shows_reviews, f"../data/tvs_reviews.csv")
 
 
 if __name__ == "__main__":

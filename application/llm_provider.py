@@ -1,11 +1,9 @@
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
 from typing import Optional
-import os
 import langsmith
 
-from dotenv import load_dotenv
-load_dotenv(verbose=True)
+import secrets_manager
 
 
 __all__ = ["LlmProvider"]
@@ -15,12 +13,12 @@ class LlmProvider:
     def __init__(self) -> None:
         self.__extraction_title_model = ChatGroq(
             model="llama-3.1-8b-instant",
-            api_key=os.getenv("GROQ_API_KEY"),
+            api_key=secrets_manager.get("GROQ_API_KEY"),
             temperature=0.0
         )
         self.__generation_model = ChatGroq(
             model="llama-3.1-8b-instant",
-            api_key=os.getenv("GROQ_API_KEY"),
+            api_key=secrets_manager.get("GROQ_API_KEY"),
             temperature=0.2
         )
 
