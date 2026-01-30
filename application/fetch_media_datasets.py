@@ -1,5 +1,4 @@
 import requests
-import streamlit
 import pandas
 import csv
 import secrets_manager
@@ -72,10 +71,6 @@ def main():
     end_date = "2025-12-31"
 
     movies_dict = get_top_movies_json(tmdb_api_key, start_date, end_date)
-    write_to_csv(movies_dict, f"../data/movies.csv")
-
-    tv_shows_dict = get_top_tv_shows_json(tmdb_api_key, start_date, end_date)
-    write_to_csv(tv_shows_dict, f"../data/tvs.csv")
     write_to_csv(movies_dict, f"data/movies.csv")
 
     tv_shows_dict = get_top_tv_shows_json(tmdb_api_key, start_date, end_date)
